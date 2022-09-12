@@ -1,0 +1,130 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        %{ if kms_key_arn != "" }
+        {
+            "Sid": "ManageKmsKey",
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:DescribeKey",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*"
+            ],
+            "Resource": [
+                "${kms_key_arn}"
+            ]
+        },
+        %{ endif }
+        %{ if tfe_install_secrets_arn != "" }
+        {
+            "Sid": "RetrieveInstallSecrets",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+                "${tfe_install_secrets_arn}"
+            ]
+        },
+        %{ endif }
+        %{ if tfe_cert_secret_arn != "" }
+        {
+            "Sid": "RetrieveCertSecret",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+                "${tfe_cert_secret_arn}"
+            ]
+        },
+        %{ endif }
+        %{ if tfe_privkey_secret_arn != "" }
+        {
+            "Sid": "RetrievePrivKeySecret",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+                "${tfe_privkey_secret_arn}"
+            ]
+        },
+        %{ endif }
+        %{ if ca_bundle_secret_arn != "" }
+        {
+            "Sid": "RetrieveCaBundleSecret",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+                "${ca_bundle_secret_arn}"
+            ]
+        },
+        %{ endif }
+        %{ if log_forwarding_enabled == true && cloudwatch_log_group_arn != "" }
+        {
+            "Sid": "WriteToCloudwatch",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:DescribeLogGroups",
+                "logs:DescribeLogStreams"
+            ],
+            "Resource": "${cloudwatch_log_group_arn}"
+        },
+        %{ endif }
+        %{ if custom_tbw_ecr_repo_arn != "" }
+        {
+            "Sid": "PullFromEcr",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:GetRepositoryPolicy",
+                "ecr:DescribeRepositories",
+                "ecr:ListImages",
+                "ecr:DescribeImages",
+                "ecr:BatchGetImage"
+            ],
+            "Resource": [
+                "${custom_tbw_ecr_repo_arn}"
+            ]
+        },
+        {
+        "Sid": "AuthToEcr",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        %{ endif }
+        {
+            "Sid": "InteractWithS3",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:GetObject",
+                "s3:DeleteObject",
+                "s3:GetBucketLocation"
+            ],
+            "Resource": [
+                %{ if bootstrap_bucket_arn != "" }"${bootstrap_bucket_arn}",%{ endif }
+                %{ if bootstrap_bucket_arn != "" }"${bootstrap_bucket_arn}/*",%{ endif }
+                %{ if log_forwarding_enabled == true && s3_log_bucket_arn != "" }"${s3_log_bucket_arn}",%{ endif }
+                %{ if log_forwarding_enabled == true && s3_log_bucket_arn != "" }"${s3_log_bucket_arn}/*",%{ endif }
+                "${app_bucket_arn}",
+                "${app_bucket_arn}/*"
+            ]
+        }
+    ]
+}
