@@ -13,3 +13,7 @@ output "tfe_lb_dns_name" {
 output "tfe_s3_bucket_name" {
   value = module.tfe.s3_bucket_name
 }
+
+output "eks_cluster_name" {
+  value = local.eks_cluster_name
+}
