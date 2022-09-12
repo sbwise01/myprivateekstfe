@@ -32,7 +32,8 @@ module "vpc" {
     "kubernetes.io/role/internal-elb"             = "1"
   }
 
-  enable_nat_gateway = true
+  enable_nat_gateway   = true
+  enable_dns_hostnames = true
 
   tags = local.tags
 }
